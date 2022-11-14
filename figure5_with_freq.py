@@ -53,7 +53,7 @@ lons =[-106.4572, 179.1966, -95.83812, 144.4382]
 fig = plt.figure(1, figsize=(18,12))
 fig, ax = plt.subplots(1,4,figsize=(18,12))
 ax = ax.flatten()
-depths = np.linspace(0,5000., 100)
+depths = np.linspace(0,7000., 300)
 
 for idx, sta in enumerate(stas):
     vp, vs, rho = get_upo(lats[idx], lons[idx], depths)
@@ -69,7 +69,7 @@ for idx, sta in enumerate(stas):
     c0=340.
     # # return in units of nm/s/Pa
     upo = c0*(lam + 2*mu)/(2*mu*(lam + mu))*10**9
-    for freq in [1./25., 1./50., 1./75., 1./100., 1./125. ]:
+    for freq in [0.01, 0.1, 1., 10. ]:
     
 
         w= 2*np.pi*freq
@@ -77,7 +77,7 @@ for idx, sta in enumerate(stas):
 
 
         ax[idx].plot(upow, depths/1000., linewidth=2, label=str(round(freq,3)) + ' Hz')
-        ax[idx].axhspan(0,3.5,color='silver', alpha=0.3)
+        ax[idx].axhspan(0,5.2,color='silver', alpha=0.3)
         ax[idx].set_ylim((min(depths/1000.), max(depths/1000.)))
         ax[idx].set_xlabel('Vertical Ratio ($nm/s/Pa$)')
         ax[idx].set_xlim((0,100))
