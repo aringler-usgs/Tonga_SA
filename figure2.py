@@ -38,7 +38,7 @@ Lamb_V = 315.
 # delay time from predicted arrival of lamb Pulse
 # size of window to do correlation
 WD = 0.75
-win = 1.0
+win = 0.5
 
 # plotting window
 Xmin = 0
@@ -222,7 +222,7 @@ for idx, sta in enumerate(stas):
             else:
                 prs = pr
     except:
-        continue
+        pass
     try:
         if valz >= 0.7:
             if 'pzs' in vars():
@@ -232,12 +232,18 @@ for idx, sta in enumerate(stas):
             else:
                 pzs = pz
     except:
-        continue
+        pass
 
 pz= np.mean(pzs, axis=0)
 pr = np.mean(prs, axis=0)
+p10z = np.percentile(pzs,10, axis=0)
+p90z = np.percentile(pzs, 90, axis=0)
+p10r = np.percentile(prs,10, axis=0)
+p90r = np.percentile(prs, 90, axis=0)
 plt.subplot(2,1,2)
 plt.semilogx(1./f, pz, color='C1', label='Vertical Mean')
+plt.semilogx(1./f, p10z, color='C3', label='10th and 90th Percentile')
+plt.semilogx(1./f, p90z, color='C3')
 plt.xlim((2,1000))
 plt.text(.9, 1, '(b)' )
 plt.ylabel('Coherence ($\gamma^2$)')
@@ -245,6 +251,8 @@ plt.legend(loc=2)
 plt.subplot(2,1,1)
 plt.text(.9, 1, '(a)' )
 plt.semilogx(1./f, pr, color='C1', label='Radial Mean')
+plt.semilogx(1./f, p10r, color='C3', label='10th and 90th Percentile')
+plt.semilogx(1./f, p90r, color='C3')
 plt.xlim((2,1000))
 plt.xlabel('Period (s)')
 plt.ylabel('Coherence ($\gamma^2$)')

@@ -84,7 +84,7 @@ def remove_polynomial(st, inv):
 
     return
 
-f = open('Theresults','w')
+f = open('Theresults_Jordan','w')
 
 for sta in stas:
 
@@ -183,52 +183,60 @@ for sta in stas:
 
     # Now we rotate the seismometer first from arbitary orientation to N and # -*- coding: utf-8 -*-
     st.rotate('->ZNE', inventory=inv)
-    st.rotate('NE->RT',back_azimuth=BAZ)
+    bestcor, bestangle = -1.,0.
+    st2 = st.copy()
+    for angle in range(-10,11):
+        st2 = st.copy()
+        nang = (BAZ+angle) % 360.
+        st2.rotate('NE->RT',back_azimuth=nang)
 
-    try:
-        # Grab the Traces we want
-        TR_P = st.select(channel='LD*')[0]
-        TR_Z = st.select(channel='LHZ')[0]
-        TR_R = st.select(channel='LHR')[0]
-    except:
-        continue
-    # Now we do our Hilber Transforms
-    # Take the Hilbert Transforms that we want
-    # Keep in mind these will no longer be trave objects
+        try:
+            # Grab the Traces we want
+            TR_P = st2.select(channel='LD*')[0]
+            TR_Z = st2.select(channel='LHZ')[0]
+            TR_R = st2.select(channel='LHR')[0]
+        except:
+            continue
+        # Now we do our Hilber Transforms
+        # Take the Hilbert Transforms that we want
+        # Keep in mind these will no longer be trave objects
 
-    TR_RHT = np.imag(hilbert(TR_R.data))
-    TR_PHT = np.imag(hilbert(TR_P.data))
+        TR_RHT = np.imag(hilbert(TR_R.data))
+        TR_PHT = np.imag(hilbert(TR_P.data))
 
-    # Now we do our correlations
+        # Now we do our correlations
 
-    cc_PR =  correlate(TR_R.data, TR_P.data,0)
-    shift_PR, value_PR = xcorr_max(cc_PR)
-    value_PR = np.round(value_PR, decimals=2)
-    print( sta, 'Radial to Pressure Correlation is: ', value_PR)
-    rat_PR = np.std(TR_R.data)/np.std(TR_P.data)
-
-
-
-    cc_ZPHT=  correlate(TR_Z.data, TR_PHT,0)
-    shift_ZPHT, value_ZPHT = xcorr_max(cc_ZPHT)
-    value_ZPHT = np.round(value_ZPHT, decimals=2)
-    print( sta, 'Vertical to HT Pressure Correlation is: ', value_ZPHT)
-    rat_ZPHT= np.std(TR_Z.data)/np.std(TR_PHT)
-
-
+        cc_PR =  correlate(TR_R.data, TR_P.data,0)
+        shift_PR, value_PR = xcorr_max(cc_PR)
+        value_PR = np.round(value_PR, decimals=2)
+        print( sta, 'Radial to Pressure Correlation is: ', value_PR)
+        rat_PR = np.std(TR_R.data)/np.std(TR_P.data)
+        if value_PR > bestcor:
+            bestcor = value_PR
+            bestangle = angle
 
 
-    cc_Ray =  correlate(TR_Z.data,TR_RHT,0)
-    shift_Ray, value_Ray = xcorr_max(cc_Ray)
-    value_Ray = np.round(value_Ray, decimals=2)
-    print(sta, 'HT Radial to Vertical Correlation is ', value_Ray)
-    rat_Ray= np.std(TR_Z.data)/np.std(TR_RHT)
+        cc_ZPHT=  correlate(TR_Z.data, TR_PHT,0)
+        shift_ZPHT, value_ZPHT = xcorr_max(cc_ZPHT)
+        value_ZPHT = np.round(value_ZPHT, decimals=2)
+        print( sta, 'Vertical to HT Pressure Correlation is: ', value_ZPHT)
+        rat_ZPHT= np.std(TR_Z.data)/np.std(TR_PHT)
+
+
+
+
+        cc_Ray =  correlate(TR_Z.data,TR_RHT,0)
+        shift_Ray, value_Ray = xcorr_max(cc_Ray)
+        value_Ray = np.round(value_Ray, decimals=2)
+        print(sta, 'HT Radial to Vertical Correlation is ', value_Ray)
+        rat_Ray= np.std(TR_Z.data)/np.std(TR_RHT)
 
 
 
     # sta, lat, lon, RP_corr, VHTpress_corr, HTV_corr
     f.write(sta +', ' + str(s_lat) + ', ' + str(s_lon) + ', ' + str(value_PR) +', '  
-        + str(rat_PR) + ', ' + str(value_ZPHT) + ', ' + str(rat_ZPHT) + ', '+str(value_Ray) +', ' + str(rat_Ray) + '\n')
+        + str(rat_PR) + ', ' + str(value_ZPHT) + ', ' + str(rat_ZPHT) + ', '+str(value_Ray) +', ' 
+        + str(rat_Ray) + ', ' + str(bestcor) + ', ' + str(bestangle) + '\n')
 
 
 f.close()

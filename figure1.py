@@ -60,7 +60,7 @@ for net in inv:
     for sta in net:
         stas.append(sta.code)
 
-s_lats, s_lons = [], []
+s_lats, s_lons, s_stas = [], [], []
 for sta in stas:
     # Get the data from IRIS pad time to account for filter ring
     try:
@@ -93,6 +93,7 @@ for sta in stas:
     coors = inv.get_coordinates(st[0].id)
     s_lats.append(coors['latitude'])
     s_lons.append(coors['longitude'])
+    s_stas.append(st[0].stats.station)
 
 lats = np.arange(89.5, -90, -1)
 lons = np.arange(-179.5, 180, 1)
@@ -132,14 +133,16 @@ ax.coastlines()
 ax.add_feature(cart.feature.LAND, zorder=2, edgecolor='k')
 ax.set_global()
 ax.coastlines(zorder=20)
-im=ax.scatter(lonv, latv, c=vals, transform=ccrs.Geodetic(), zorder=30, vmin=0., vmax=30.)
+im=ax.scatter(lonv, latv, c=vals, transform=ccrs.Geodetic(), zorder=30, vmin=0., vmax=35.)
 ax.scatter(s_lons, s_lats, c='white', transform=ccrs.Geodetic(), zorder=30, marker='^', s=200, label='GSN Stations with Pressure', edgecolors='k')
-ax.scatter(175.4, -20.5, c='r',marker='*',s= 200, transform=ccrs.Geodetic(), zorder=30, vmin=0., vmax=10, label='Hunga Tonga Eruption')
-ax.scatter(180-175.4, 20.5, c='k',marker='*',s= 200, transform=ccrs.Geodetic(), zorder=30, vmin=0., vmax=10, label='Eruption Antipode')
+for sta, lat, lon in zip(s_stas, s_lats, s_lons):
+    ax.text(lon, lat, sta, transform=ccrs.Geodetic(), fontsize=14, zorder=35)
+ax.scatter(175.4, -20.5, c='r',marker='*',s= 300, transform=ccrs.Geodetic(), zorder=30, vmin=0., vmax=10, label='Hunga Tonga Eruption')
+ax.scatter(180-175.4, 20.5, c='r',marker='p',s= 230, transform=ccrs.Geodetic(), zorder=30, vmin=0., vmax=10, label='Eruption Antipode')
 #cb_ax = fig.add_axes([0.2, 0.05, 0.6, 0.03])
 cbar = fig.colorbar(im,  orientation='horizontal')
 cbar.set_label('Crust1.0 Vertical Pressure Ratio (nm/s/Pa)') 
 fig.legend(ncol=3, fontsize=18, loc='lower center')
 
-plt.savefig('Figure1.png', format='PNG', dpi=400)
-plt.savefig('Figure1.pdf', format='PDF', dpi=400)
+plt.savefig('Figure1.png', format='PNG', dpi=300)
+plt.savefig('Figure1.pdf', format='PDF', dpi=200)

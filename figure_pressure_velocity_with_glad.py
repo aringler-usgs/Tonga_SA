@@ -38,7 +38,7 @@ def get_upo(lat, lon, depths):
 
 
 
-depths = np.linspace(0,5000., 1000)
+depths = np.linspace(0,7000., 1000)
 fig = plt.figure(1, figsize=(16,10))
 zrats, upos, zcorrs =[],[], []
 rrats, wpos, rcorrs = [], [], []
@@ -73,7 +73,7 @@ for idx, line in enumerate(f):
         zrat = 20.
     cnt +=1
     cvp, cvs, crho = get_upo(lat, lon, depths)
-    for idx2, dep in enumerate([3500]):
+    for idx2, dep in enumerate([5200]):
         vp = np.mean(cvp[(depths <= dep)])
         vs = np.mean(cvs[(depths <= dep)])
         rho =np.mean(crho[(depths <= dep)])
